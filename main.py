@@ -1,35 +1,35 @@
+import sys
 from string import ascii_lowercase
 from os.path import dirname, abspath
 from pathlib import Path
 
+from stats import get_num_words
+
 ROOT = Path(dirname(abspath(__file__)))
+args = sys.argv
+if not args:
+    print("Usage: python3 main.py <path_to_book>")
+    sys.exit(1)
 
-
-def number_of_word(book: Path):
-    if isinstance(book, Path):
-        book = book.read_text()
-
-    return len(book.split())
-
+def sort_on(dict):
+    return dict[-1]
 
 def count_char(book: Path):
     if isinstance(book, Path):
         book = book.read_text()
     book = book.lower()
-    return {s: book.count(s) for s in set(book)}
+    return dict(sorted({s: book.count(s) for s in set(book)}.items(), key=sort_on))
 
 
 def main():
-    books_dir = ROOT / 'books'
-    frankenstein = books_dir / 'frankenstein.txt'
+    book = (ROOT / sys.argv[-1]).absolute()
 
-    print(f"--- Begin report of {frankenstein.parent.name}/{frankenstein.name} ---")
-    print("{}  words found in the document".format(number_of_word(frankenstein)), end="\n\n")
-    frankenstein_count = count_char(frankenstein)
-    for letter in ascii_lowercase:
-        if frankenstein_count[letter]:  # potential un-use letter ?
-            print(f"The {repr(letter)} character was found {frankenstein_count[letter]} times")
-    print("--- End report ---")
+    print(f"============ BOOKBOT ============\nAnalyzing book found at {book.parent.name}/{book.name} ---")
+    print("----------- Word Count ----------\nFound {} total words\n--------- Character Count -------".format(get_num_words(book)))
+    book_count = count_char(book)
+    for letter, v in book_count.items():
+        print(f"{letter}: {v}")
+    print("============= END ===============")
 
 
 if __name__ == '__main__':
